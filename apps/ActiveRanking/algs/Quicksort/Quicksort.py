@@ -10,40 +10,61 @@ import next.utils as utils
 class Quicksort:
     app_id = 'ActiveRanking'
     def initExp(self, butler, n=None, params=None):
+        nquicksorts = 8
         butler.algorithms.set(key='n', value=n)
-        arr = np.random.permutation(range(n))
-        butler.algorithms.set(key='arr', value=arr)
-        butler.algorithms.set(key='l', value=0)
-        butler.algorithms.set(key='h', value=n-1)
-        butler.algorithms.set(key='ptr', value=0)
-        butler.algorithms.set(key='lmax', value=-1)
-        butler.algorithms.set(key='pivot', value=n-1)
-        butler.algorithms.set(key='stack', value= [])
-        butler.algorithms.set(key='ranking', value=np.zeros(n))
+        butler.algorithms.set(key='nquicksorts', value=nquicksorts)
+        arrlist = []
+        for _ in range(nquicksorts):
+            arrlist.append(np.random.permutation(range(n)))
+        butler.algorithms.set(key='arrlist', value=arrlist)
+        butler.algorithms.set(key='llist', value=[0]*nquicksorts)
+        butler.algorithms.set(key='hlist', value=[n-1]*nquicksorts)
+        butler.algorithms.set(key='ptrlist', value=[0]*nquicksorts)
+        butler.algorithms.set(key='lmaxlist', value=[-1]*nquicksorts)
+        butler.algorithms.set(key='pivotlist', value=[n-1]*nquicksorts)
+        butler.algorithms.set(key='stacklist', value= [[]]*nquicksorts)
+
+        rankinglist = []
+        for _ in range(nquicksorts):
+            rankinglist.append(np.zeros(n))
+        butler.algorithms.set(key='rankinglist', value=rankinglist)
         return True
 
     def getQuery(self, butler, participant_uid):
         #print arr
         #print arr[ptr],arr[pivot]
-        arr = butler.algorithms.get('arr')
-        ptr = butler.algorithms.get('ptr')
-        pivot = butler.algorithms.get('pivot')
+        nquicksorts = butler.algorithms.get('nquicksorts')
+        quicksortID = np.random.randint(nquicksorts)
+        arrlist = butler.algorithms.get('arrlist')
+        arr = arrlist[quicksortID]
+        ptrlist = butler.algorithms.get('ptrlist')
+        ptr = ptrlist[quicksortID]
+        pivotlist = butler.algorithms.get('pivotlist')
+        pivot = pivotlist[quicksortID]
 # pick a random Quicksort
 # get a query from this chosen Quicksort
 # Add to the butler dictionary a key with the query_uid and a value equal to the chosen quicksort number
 # return this query
-        return [arr[ptr], arr[pivot]]
+        return [arr[ptr], arr[pivot], quicksortID]
 
 
-    def processAnswer(self, butler, left_id=0, right_id=0, winner_id=0):
-        arr = butler.algorithms.get('arr')
-        l = butler.algorithms.get('l')
-        h = butler.algorithms.get('h')
-        lmax = butler.algorithms.get('lmax')
-        pivot = butler.algorithms.get('pivot')
-        stack = butler.algorithms.get('stack')
-        ptr = butler.algorithms.get('ptr')
-        ranking = butler.algorithms.get('ranking')
+    def processAnswer(self, butler, left_id=0, right_id=0, winner_id=0, quicksortID=0):
+        arrlist = butler.algorithms.get('arrlist')
+        arr = arrlist[quicksortID]
+        llist = butler.algorithms.get('llist')
+        l = llist[quicksortID]
+        hlist = butler.algorithms.get('hlist')
+        h = hlist[quicksortID]
+        lmaxlist = butler.algorithms.get('lmaxlist')
+        lmax = lmaxlist[quicksortID]
+        pivotlist = butler.algorithms.get('pivotlist')
+        pivot = pivotlist[quicksortID]
+        stacklist = butler.algorithms.get('stacklist')
+        stack = stacklist[quicksortID]
+        ptrlist = butler.algorithms.get('ptrlist')
+        ptr = ptrlist[quicksortID]
+        rankinglist = butler.algorithms.get('rankinglist')
+        ranking = rankinglist[quicksortID]
         #pdb.set_trace()
 
         if winner_id==arr[pivot]:
@@ -73,14 +94,24 @@ class Quicksort:
                 lmax = l-1
                 pivot = h
                 ptr = l
-        butler.algorithms.set(key='arr', value=arr)
-        butler.algorithms.set(key='l', value=l)
-        butler.algorithms.set(key='h', value=h)
-        butler.algorithms.set(key='lmax', value=lmax)
-        butler.algorithms.set(key='pivot', value=pivot)
-        butler.algorithms.set(key='stack', value=stack)
-        butler.algorithms.set(key='ptr', value=ptr)
-        butler.algorithms.set(key='ranking', value=ranking)
+
+        arrlist[quicksortID] = arr
+        llist[quicksortID] = l
+        hlist[quicksortID] = h
+        lmaxlist[quicksortID] = lmax
+        pivotlist[quicksortID] = pivot
+        stacklist[quicksortID] = stack
+        ptrlist[quicksortID] = ptr
+        rankinglist[quicksortID] = ranking
+
+        butler.algorithms.set(key='arrlist', value=arrlist)
+        butler.algorithms.set(key='llist', value=llist)
+        butler.algorithms.set(key='hlist', value=hlist)
+        butler.algorithms.set(key='lmaxlist', value=lmaxlist)
+        butler.algorithms.set(key='pivotlist', value=pivotlist)
+        butler.algorithms.set(key='stacklist', value=stacklist)
+        butler.algorithms.set(key='ptrlist', value=ptrlist)
+        butler.algorithms.set(key='rankinglist', value=rankinglist)
         #print ranking
         return True
 
