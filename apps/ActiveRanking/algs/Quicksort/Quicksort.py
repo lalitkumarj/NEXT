@@ -35,7 +35,7 @@ class Quicksort:
         return [arr[ptr], arr[pivot]]
 
 
-    def processAnswer(self, butler, left_id=0, right_id=0, winner_id=0):
+    def processAnswer(self, butler, left_id=0, right_id=0, winner_id=0, quicksortid):
         arr = butler.algorithms.get('arr')
         l = butler.algorithms.get('l')
         h = butler.algorithms.get('h')
